@@ -1,5 +1,7 @@
 # Iron Lady Leadership Programs Chatbot
 
+<img width="1210" height="870" alt="image" src="https://github.com/user-attachments/assets/b808f0a6-6ac0-49b9-9a90-9a49ad9ccf6d" />
+
 A Flask-based chatbot that provides information about Iron Lady's leadership development programs. The chatbot uses both predefined FAQs and AI-powered responses to answer user queries about programs, duration, mode of delivery, certifications, and mentors.
 
 ## Features
