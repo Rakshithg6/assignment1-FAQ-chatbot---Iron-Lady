@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iron Lady Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Keeping any custom styles that might be needed */
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .chat-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: 20%;
+        }
+        .bot-message {
+            background-color: #f5f5f5;
+            margin-right: 20%;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #1976d2;
+        }
+        .faq-button {
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #fff;
+            border: 1px solid #2196f3;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #2196f3;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+            white-space: normal;
+        }
+        .faq-button:hover {
+            background-color: #2196f3;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(33,150,243,0.2);
+        }
+        .bot-message p {
+            margin: 5px 0;
+        }
+        .bot-message div {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>Iron Lady Leadership Programs</h1>
+            <p>Ask me anything about our programs!</p>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your question here..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function addMessage(message, isUser) {
+            const messagesDiv = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.innerHTML = isUser ? message : message.replace(/\n/g, '<br>');
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function askQuestion(question) {
+            document.getElementById('user-input').value = question;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage(message, true);
+                input.value = '';
+                
+                try {
+                    const response = await fetch('/ask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ message: message })
+                    });
+                    
+                    const data = await response.json();
+                    addMessage(data.response, false);
+                } catch (error) {
+                    addMessage('Sorry, there was an error processing your request.', false);
+                }
+            }
+        }
+
+        // Add welcome message and FAQ buttons when page loads
+        window.onload = function() {
+            // Add welcome message
+            const welcomeHtml = `
+                <div>
+                    <p>👋 Hi! I'm your Iron Lady Leadership Programs assistant.</p>
+                    <p>How can I help you today? Choose from the common questions below:</p>
+                    <div style="margin-top: 10px;">
+                        <button onclick="askQuestion('What programs does Iron Lady offer?')" class="faq-button">📚 What programs does Iron Lady offer?</button>
+                        <button onclick="askQuestion('What is the program duration?')" class="faq-button">⏱️ What is the program duration?</button>
+                        <button onclick="askQuestion('Is the program online or offline?')" class="faq-button">🌐 Is the program online or offline?</button>
+                        <button onclick="askQuestion('Are certificates provided?')" class="faq-button">🎓 Are certificates provided?</button>
+                        <button onclick="askQuestion('Who are the mentors?')" class="faq-button">👥 Who are the mentors?</button>
+                    </div>
+                </div>`;
+            const messagesDiv = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot-message';
+            messageDiv.innerHTML = welcomeHtml;
+            messagesDiv.appendChild(messageDiv);
+        };
+    </script>
+</body>
+</html>
